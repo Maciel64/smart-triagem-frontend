@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
-  Send,
-  Heart,
   Activity,
-  User,
-  FileText,
   AlertCircle,
+  FileText,
+  Heart,
+  Send,
+  User,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface Message {
   id: string;
@@ -172,7 +172,7 @@ export default function MedicalTriageChat() {
         } else {
           if (newTriageData.symptoms.includes(response)) {
             newTriageData.symptoms = newTriageData.symptoms.filter(
-              (s) => s !== response
+              (s) => s !== response,
             );
           } else {
             newTriageData.symptoms = [...newTriageData.symptoms, response];
@@ -195,7 +195,7 @@ export default function MedicalTriageChat() {
     const highPrioritySymptoms = ["Dor no peito", "Falta de ar"];
     if (
       newTriageData.symptoms.some((symptom) =>
-        highPrioritySymptoms.includes(symptom)
+        highPrioritySymptoms.includes(symptom),
       )
     ) {
       newTriageData.urgency = "alta";
@@ -330,7 +330,7 @@ export default function MedicalTriageChat() {
             const updatedQuestion: Message = {
               id: (Date.now() + 1).toString(),
               text: `Sintomas selecionados: ${updatedData.symptoms.join(
-                ", "
+                ", ",
               )}. Selecione mais ou finalize.`,
               sender: "bot",
               timestamp: new Date(),
@@ -476,8 +476,8 @@ export default function MedicalTriageChat() {
                   message.sender === "user"
                     ? "bg-card text-card-foreground rounded-br-sm border border-primary/20"
                     : message.type === "summary"
-                    ? "bg-accent/10 text-foreground rounded-bl-sm border border-accent/30"
-                    : "bg-popover text-popover-foreground rounded-bl-sm border border-border"
+                      ? "bg-accent/10 text-foreground rounded-bl-sm border border-accent/30"
+                      : "bg-popover text-popover-foreground rounded-bl-sm border border-border"
                 }`}
               >
                 {message.type === "summary" ? (
@@ -530,8 +530,8 @@ export default function MedicalTriageChat() {
                           message.status === "sent"
                             ? "bg-muted-foreground"
                             : message.status === "delivered"
-                            ? "bg-muted-foreground"
-                            : "bg-primary"
+                              ? "bg-muted-foreground"
+                              : "bg-primary"
                         }`}
                       />
                       <div
@@ -539,8 +539,8 @@ export default function MedicalTriageChat() {
                           message.status === "delivered"
                             ? "bg-muted-foreground"
                             : message.status === "read"
-                            ? "bg-primary"
-                            : "bg-transparent"
+                              ? "bg-primary"
+                              : "bg-transparent"
                         }`}
                       />
                     </div>
