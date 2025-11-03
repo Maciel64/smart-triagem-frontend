@@ -1,14 +1,16 @@
 "use client";
-import { motion, AnimatePresence } from "motion/react";
 import {
-  X,
-  Calendar,
   Activity,
+  AlertTriangle,
+  Calendar,
+  Clock,
   Heart,
   Thermometer,
-  Clock,
-  AlertTriangle,
+  X,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,13 +19,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import type { TriageData } from "@/types/medical";
 import { triageQuestions } from "@/data/triage-questions";
+import type { Screening } from "@/lib/queries/screening";
+import type { TriageData } from "@/types/medical";
 
 interface TriageDetailModalProps {
-  triage: TriageData | null;
+  triage: Screening | null;
   isOpen: boolean;
   onClose: () => void;
   onUpdateStatus: (id: string, status: TriageData["status"]) => void;
@@ -96,7 +97,7 @@ export default function TriageDetailModal({
                 <div className="flex items-center gap-4">
                   <Avatar className="h-12 w-12">
                     <AvatarFallback className="bg-muted text-lg">
-                      {triage.patientName
+                      {triage.patient?.name
                         .split(" ")
                         .map((n) => n[0])
                         .join("")
@@ -104,7 +105,9 @@ export default function TriageDetailModal({
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h2 className="text-2xl font-bold">{triage.patientName}</h2>
+                    <h2 className="text-2xl font-bold">
+                      {triage.patient?.name}
+                    </h2>
                     <p className="text-muted-foreground">
                       Protocolo: {triage.id}
                     </p>
@@ -122,8 +125,8 @@ export default function TriageDetailModal({
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4" />
                   <span className="text-sm font-medium">Urgência:</span>
-                  <Badge className={getUrgencyColor(triage.urgencyLevel)}>
-                    {triage.urgencyLevel.toUpperCase()}
+                  <Badge className={getUrgencyColor(triage.status)}>
+                    {triage.status.toUpperCase()}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
@@ -137,7 +140,7 @@ export default function TriageDetailModal({
                   <Calendar className="h-4 w-4" />
                   <span className="text-sm font-medium">Data:</span>
                   <span className="text-sm">
-                    {formatDate(triage.timestamp)}
+                    {formatDate(new Date(triage.createdAt))}
                   </span>
                 </div>
               </div>
@@ -148,12 +151,12 @@ export default function TriageDetailModal({
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Thermometer className="h-4 w-4" />
-                      Nível de Dor
+                      Relatório da IA
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold text-chart-5">
-                      {triage.painLevel}/10
+                      {triage.aiScreening}
                     </div>
                   </CardContent>
                 </Card>
@@ -187,32 +190,6 @@ export default function TriageDetailModal({
                 </Card>
               </div>
 
-              {/* Detailed Responses */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Respostas Detalhadas</CardTitle>
-                  <CardDescription>
-                    Informações coletadas durante a triagem
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {Object.entries(triage.responses).map(
-                    ([questionId, response]) => (
-                      <div
-                        key={questionId}
-                        className="border-l-2 border-accent pl-4"
-                      >
-                        <h4 className="font-semibold text-sm mb-1">
-                          {getQuestionText(questionId)}
-                        </h4>
-                        <p className="text-muted-foreground">{response}</p>
-                      </div>
-                    )
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Actions */}
               <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
                 <Button
                   variant="outline"

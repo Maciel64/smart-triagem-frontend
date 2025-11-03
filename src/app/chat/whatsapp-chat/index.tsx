@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useCreateScreening } from "@/lib/mutations/screenigs";
 
 interface Message {
   id: string;
@@ -52,6 +53,7 @@ export default function MedicalTriageChat() {
     urgency: "baixa",
     additionalInfo: "",
   });
+  const { mutate } = useCreateScreening();
 
   const symptomDetailQuestions: { [key: string]: string[] } = {
     "Dor de cabeça": [

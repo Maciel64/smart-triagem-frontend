@@ -1,23 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "motion/react";
 import {
-  Users,
-  AlertTriangle,
-  Clock,
+  Activity,
+  BarChart3,
+  Calendar,
   CheckCircle,
-  Search,
+  Clock,
   Download,
   Eye,
-  Calendar,
-  Activity,
   Heart,
+  Search,
   Thermometer,
-  BarChart3,
+  Users,
 } from "lucide-react";
+import { motion } from "motion/react";
+import { useState } from "react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -25,91 +25,38 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { getScreeningsQuery, type Screening } from "@/lib/queries/screening";
 import type { TriageData } from "@/types/medical";
-import TriageDetailModal from "./triage/triage-details-modal";
 import MedicalReports from "./triage/medical-reports";
+import TriageDetailModal from "./triage/triage-details-modal";
 
 export default function MedicalDashboard() {
-  const [triages, setTriages] = useState<TriageData[]>([
-    {
-      id: "1",
-      timestamp: new Date("2025-08-01T10:00:00"),
-      urgencyLevel: "critica",
-      painLevel: 9,
-      status: "em-andamento",
-      medications: ["Paracetalmol", "Dipirona"],
-      patientName: "Lucia Maria",
-      symptoms: ["Tonturas", "Sonolência"],
-      responses: {},
-    },
-    {
-      id: "2",
-      timestamp: new Date("2025-08-02T12:00:00"),
-      urgencyLevel: "alta",
-      painLevel: 6,
-      status: "concluida",
-      medications: ["Paracetalmol", "Dipirona"],
-      patientName: "Roberto Silva",
-      symptoms: ["Dor de Cabeça", "Febre"],
-      responses: {},
-    },
-  ]);
+  const { data: screenings } = getScreeningsQuery();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterUrgency, setFilterUrgency] = useState<string>("all");
-  const [selectedTriage, setSelectedTriage] = useState<TriageData | null>(null);
+  const [selectedTriage, setSelectedTriage] = useState<Screening | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentView, setCurrentView] = useState<"dashboard" | "reports">(
-    "dashboard"
+    "dashboard",
   );
 
-  // useEffect(() => {
-  //   const loadTriages = () => {
-  //     const savedTriages = JSON.parse(localStorage.getItem("triages") || "[]");
-  //     setTriages(savedTriages);
-  //   };
-
-  //   loadTriages();
-  //   // Atualizar a cada 30 segundos para novos dados
-  //   const interval = setInterval(loadTriages, 30000);
-  //   return () => clearInterval(interval);
-  // }, []);
-
   const updateTriageStatus = (id: string, newStatus: TriageData["status"]) => {
-    const updatedTriages = triages.map((triage) =>
-      triage.id === id ? { ...triage, status: newStatus } : triage
-    );
-    setTriages(updatedTriages);
-    localStorage.setItem("triages", JSON.stringify(updatedTriages));
-
-    // Atualizar triagem selecionada se for a mesma
     if (selectedTriage?.id === id) {
       setSelectedTriage({ ...selectedTriage, status: newStatus });
     }
   };
 
-  const openTriageDetail = (triage: TriageData) => {
+  const openTriageDetail = (triage: Screening) => {
     setSelectedTriage(triage);
     setIsModalOpen(true);
   };
 
-  const filteredTriages = triages.filter((triage) => {
-    const matchesSearch =
-      triage.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      triage.symptoms.some((symptom) =>
-        symptom.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    const matchesFilter =
-      filterUrgency === "all" || triage.urgencyLevel === filterUrgency;
-    return matchesSearch && matchesFilter;
-  });
-
   const urgencyStats = {
-    critica: triages.filter((t) => t.urgencyLevel === "critica").length,
-    alta: triages.filter((t) => t.urgencyLevel === "alta").length,
-    media: triages.filter((t) => t.urgencyLevel === "media").length,
-    baixa: triages.filter((t) => t.urgencyLevel === "baixa").length,
+    alta: screenings?.filter((t) => t.severity === "HIGH").length,
+    media: screenings?.filter((t) => t.severity === "MEDIUM").length,
+    baixa: screenings?.filter((t) => t.severity === "LOW").length,
   };
 
   const getUrgencyColor = (urgency: string) => {
@@ -132,7 +79,7 @@ export default function MedicalDashboard() {
   };
 
   const exportData = () => {
-    const dataStr = JSON.stringify(triages, null, 2);
+    const dataStr = JSON.stringify(screenings, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
@@ -144,7 +91,6 @@ export default function MedicalDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-4">
@@ -206,31 +152,7 @@ export default function MedicalDashboard() {
             <MedicalReports />
           ) : (
             <>
-              {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        Crítica
-                      </CardTitle>
-                      <AlertTriangle className="h-4 w-4 text-destructive" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-destructive">
-                        {urgencyStats.critica}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Atendimento imediato
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -359,7 +281,7 @@ export default function MedicalDashboard() {
 
               {/* Triages List */}
               <div className="space-y-4">
-                {filteredTriages.length === 0 ? (
+                {screenings?.length === 0 ? (
                   <Card>
                     <CardContent className="flex items-center justify-center py-12">
                       <div className="text-center">
@@ -368,7 +290,7 @@ export default function MedicalDashboard() {
                           Nenhuma triagem encontrada
                         </h3>
                         <p className="text-muted-foreground">
-                          {triages.length === 0
+                          {screenings.length === 0
                             ? "Aguardando novos pacientes..."
                             : "Tente ajustar os filtros de busca."}
                         </p>
@@ -376,7 +298,7 @@ export default function MedicalDashboard() {
                     </CardContent>
                   </Card>
                 ) : (
-                  filteredTriages.map((triage, index) => (
+                  screenings?.map((triage, index) => (
                     <motion.div
                       key={triage.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -389,7 +311,7 @@ export default function MedicalDashboard() {
                             <div className="flex items-center gap-3">
                               <Avatar>
                                 <AvatarFallback className="bg-muted">
-                                  {triage.patientName
+                                  {triage.patient?.name
                                     .split(" ")
                                     .map((n) => n[0])
                                     .join("")
@@ -398,19 +320,21 @@ export default function MedicalDashboard() {
                               </Avatar>
                               <div>
                                 <CardTitle className="text-lg">
-                                  {triage.patientName}
+                                  {triage.patient?.name}
                                 </CardTitle>
                                 <CardDescription>
                                   Protocolo: {triage.id} •{" "}
-                                  {formatDate(triage.timestamp)}
+                                  {formatDate(new Date(triage.createdAt))}
                                 </CardDescription>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge
-                                className={getUrgencyColor(triage.urgencyLevel)}
+                                className={getUrgencyColor(
+                                  triage.severity || "LOW",
+                                )}
                               >
-                                {triage.urgencyLevel.toUpperCase()}
+                                {triage.severity?.toUpperCase()}
                               </Badge>
                               <Button
                                 variant="outline"
@@ -437,14 +361,11 @@ export default function MedicalDashboard() {
                             <div>
                               <h4 className="font-semibold mb-2 flex items-center gap-2">
                                 <Thermometer className="h-4 w-4" />
-                                Nível de Dor
+                                Relatório da IA
                               </h4>
                               <div className="flex items-center gap-2">
-                                <div className="text-2xl font-bold text-chart-5">
-                                  {triage.painLevel}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  /10
+                                <div className="text-sm font-bold text-chart-5">
+                                  {triage.aiScreening}
                                 </div>
                               </div>
                             </div>
