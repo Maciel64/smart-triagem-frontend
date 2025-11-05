@@ -12,13 +12,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { triageQuestions } from "@/data/triage-questions";
 import type { Screening } from "@/lib/queries/screening";
 import type { TriageData } from "@/types/medical";
@@ -68,11 +62,6 @@ export default function TriageDetailModal({
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleString("pt-BR");
-  };
-
-  const getQuestionText = (questionId: string) => {
-    const question = triageQuestions.find((q) => q.id === questionId);
-    return question?.question || questionId;
   };
 
   return (
