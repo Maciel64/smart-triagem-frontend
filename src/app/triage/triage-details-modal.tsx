@@ -13,7 +13,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { triageQuestions } from "@/data/triage-questions";
 import type { Screening } from "@/lib/queries/screening";
 import type { TriageData } from "@/types/medical";
 
@@ -135,48 +134,52 @@ export default function TriageDetailModal({
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Thermometer className="h-4 w-4" />
-                      Relatório da IA
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-chart-5">
-                      {triage.aiScreening}
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="grid grid-cols-1 gap-4">
+                {triage.aiScreening && (
+                  <Card className="col-span-1">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Thermometer className="h-4 w-4 text-chart-5" />
+                        Relatório da IA
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm text-foreground leading-relaxed break-words whitespace-pre-wrap max-h-[400px] overflow-y-auto rounded border border-border bg-muted/30 p-4">
+                        {triage.aiScreening}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Activity className="h-4 w-4" />
-                      Sintomas
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-sm">
-                      {triage.symptoms.length} relatado(s)
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="grid grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Activity className="h-4 w-4" />
+                        Sintomas
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm">
+                        {triage.symptoms.length} relatado(s)
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Heart className="h-4 w-4" />
-                      Medicamentos
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-sm">
-                      {triage.medications.length} medicamento(s)
-                    </div>
-                  </CardContent>
-                </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Heart className="h-4 w-4" />
+                        Medicamentos
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm">
+                        {triage.medications.length} medicamento(s)
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
